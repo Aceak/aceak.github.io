@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>自托管 Obsidian 多端同步服务器</title>
+    <url>/2025/05/09/obsidian/</url>
+    <content><![CDATA[在使用 Obsidian 进行笔记管理时，多设备同步是一个重要需求。虽然有官方的 Obsidian Sync 服务，但鉴于其价格以及国内的稳定性，自建同步服务器是更好的选择。本文将尝试基于 CouchDB 搭建自己的 Obsidian LiveSync 同步服务器，实现多端笔记实时同步。
+什么是 Obsidian LiveSync？Obsidian LiveSync 是一个 Obsidian 插件，允许用户通过 CouchDB 兼容服务器同步多个 Vault 副本。相比官方同步服务，它的优点是：
+
+数据完全存储在自己的服务器。
+同步速度快，延迟低。
+支持端到端加密。
+免费开源。
+
+部署 CouchDB环境准备本文以 Rocky 9 为例，其他 Linux 发行版类似。
+安装 CouchDB添加 CouchDB 官方源Rocky Linux 官方仓库没有最新 CouchDB，需要添加 Apache 官方源。  
+sudo yum install -y yum-utilssudo yum-config-manager --add-repo https://couchdb.apache.org/repo/couchdb.repo# 启用 EPEL 软件源sudo dnf config-manager --set-enabled crbsudo dnf install epel-release epel-next-release # epel-release 有国内源# 可选：epel-release 换成清华源sudo sed -e &#x27;s!^metalink=!#metalink=!g&#x27; \    -e &#x27;s!^#baseurl=!baseurl=!g&#x27; \    -e &#x27;s!https\?://download\.fedoraproject\.org/pub/epel!https://mirrors.tuna.tsinghua.edu.cn/epel!g&#x27; \    -e &#x27;s!https\?://download\.example/pub/epel!https://mirrors.tuna.tsinghua.edu.cn/epel!g&#x27; \    -i /etc/yum.repos.d/epel&#123;,-testing&#125;.repo# 由于无法同步，镜像站不包含 EPEL Cisco OpenH264 仓库（`epel-cisco-openh264.repo`），如果不需要可手动将其改为 `enabled=0`。
+
+安装 CouchDBsudo yum install -y mozjs78 # RedHat &lt; 9 的不需要安装sudo yum install -y couchdb# 安装可能会比较慢，可以尝试使用代理加速
+
+配置 CouchDB修改默认CouchDB 配置文件路径为 /opt/couchdb/etc/local.ini 
+[couchdb]single_node = true                           ; 启用单节点模式max_document_size = 50000000                 ; 允许最大文档大小（50MB）[chttpd]port = 5984                                  ; CouchDB HTTP 监听端口，默认为 5984bind_address = 127.0.0.1                     ; 监听地址，建议设为 127.0.0.1，仅允许本地访问（由 Nginx 反代）require_valid_user = true                    ; 所有请求都必须通过验证（强制登录）max_http_request_size = 4294967296           ; 最大请求体大小（单位字节），此处为 4GB[chttpd_auth]require_valid_user = true                    ; 强制所有请求进行用户验证authentication_redirect = /_utils/session.html ; 浏览器请求未登录时跳转到 Web 登录界面[httpd]WWW-Authenticate = Basic realm=&quot;couchdb&quot;     ; 启用 HTTP Basic 认证提示enable_cors = true                           ; 启用 CORS（跨域资源共享）[admins]admin = mysecretpassword                     ; 管理员用户名及密码（首次初始化使用）[cors]origins = app://obsidian.md,capacitor://localhost,http://localhost                                             ; 允许 Obsidian 移动端/桌面端连接credentials = true                           ; 允许发送认证信息（如 Cookie / Authorization Header）headers = accept, authorization, content-type, origin, referer                                             ; 允许的请求头methods = GET, PUT, POST, HEAD, DELETE       ; 允许的请求方法max_age = 3600                               ; CORS 预检请求缓存时间（单位：秒）[ssl];enable = true;cert_file = /full/path/to/server_cert.pem;key_file = /full/path/to/server_key.pem;password = somepassword
+
+启用 CouchDB 并 开启自启sudo systemctl enable --now couchdb    # 启用开机自启并运行 CouchDBsudo systemctl status couchdb          # 查看运行状态
+
+发现启用 CouchDB 后报错 Error: the _users database does not exist ，说明 CouchDB 正尝试访问其默认的 _users 系统数据库，但这个数据库尚未创建。这个数据库用于用户认证和权限管理，是正常运行所必需的。
+解决方法： 手动创建 _users 数据库可以使用命令行工具 curl 或浏览器访问 CouchDB 的 HTTP API 创建这个数据库。
+curl -X PUT http://127.0.0.1:5984/_users# 如果 CouchDB 开启了认证，请加上用户名密码（例如 admin/admin）：curl -X PUT http://admin:admin@127.0.0.1:5984/_userssudo systemctl restart couchdb    # 创建完成后，重启 CouchDBsudo systemctl status couchdb     # 查看运行状态
+测试访问 CouchDB
+curl http://admin:admin@127.0.0.1:5984 # 也可以用浏览器访问
+CouchDB 已成功部署并正常运行。
+配置 HTTPS 反向代理为了安全访问，建议通过 Nginx + SSL 证书为 CouchDB 提供 HTTPS 支持。
+安装 Nginx# 安装 Nginxsudo dnf install -y nginx         # 启动并自启 Nginxsudo systemctl enable --now nginx
+配置反向代理编辑 /etc/nginx/conf.d/couchdb.conf ：
+# HTTP 重定向到 HTTPSserver &#123;    listen 80;    server_name your.domain.com;    # 可选：防止暴露版本信息    server_tokens off;    return 301 https://$host$request_uri;&#125;# HTTPS 反向代理到 CouchDBserver &#123;    listen 443 ssl http2;    server_name your.domain.com;	# 配置 SSL 证书路径    ssl_certificate     /etc/letsencrypt/live/your.domain.com/fullchain.pem;    ssl_certificate_key /etc/letsencrypt/live/your.domain.com/privkey.pem;    # 安全增强（可选）    ssl_protocols TLSv1.2 TLSv1.3;    ssl_prefer_server_ciphers on;    # 自定义访问日志路径    access_log /var/log/nginx/couchdb.log main;    error_log  /var/log/nginx/couchdb_error.log warn;    location / &#123;        proxy_pass http://127.0.0.1:5984/;        proxy_set_header Host $host;        proxy_set_header X-Real-IP $remote_addr;        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;    &#125;&#125;
+配置好之后测试 Nginx ，如果没报错，则重启Nginx
+# 检验 Nginx 配置nginx -t## nginx: the configuration file /etc/nginx/nginx.conf syntax is ok## nginx: configuration file /etc/nginx/nginx.conf test is successful# 重启 Nginxsudo systemctl restart nginx
+至此，Nginx反向代理配置完成。
+Obsidian 配置 LiveSync下载 LiveSync 插件Obsidian - 设置 - 第三方插件 - 社区插件市场 - 浏览
+搜索 LiveSync 并安装
+
+配置 LiveSyncObsidian - 设置 - Self-hosted LiveSync - ManialSetup - Start - Remote Configuration检验数据库配置是可能会出现几个告警，可通过点击告警后面的fix来修复，至此第一个设备配置完成。
+多端同步设置 - Self-hosted LiveSync - ManialSetup - Setup - To setup other devices 生成同步 URI
+在其他设备上安装好 Self-hosted LiveSync 插件后，进入 Setup 页面，点击 Connect with setup URI 并输入同步 URI ，后续选择第一项，确认导入。
+同步策略设置 - Self-hosted LiveSync - Sync Settings 可以配置同步策略。同步模式 LiveSync 为实时同步，在跟移动设备同步时，启用 LiveSync 会提升功耗，按需开启。
+]]></content>
+      <categories>
+        <category>工具</category>
+      </categories>
+      <tags>
+        <tag>obsidian</tag>
+        <tag>工具</tag>
+        <tag>笔记</tag>
+      </tags>
+  </entry>
+</search>
