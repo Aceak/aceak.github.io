@@ -220,7 +220,6 @@
       pageview: true,
       dark: 'html[data-theme="dark"]',
       comment: true,
-      search: 'false',
       ...option,
       imageUploader: (file) => {
           if (!file) {  
@@ -241,6 +240,7 @@
             .then((resp) => resp.json())
             .then((resp) => resp.data.links.url);
         },
+        search: 'false',
       path: isShuoshuo ? path : (option && option.path) || path
     })
 
