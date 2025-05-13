@@ -208,7 +208,7 @@
     idPath = decodeURI(window.location.pathname);
   }
   const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
-  const option = {"search":false}
+  const option = null
 
   const destroyWaline = ele => ele.destroy()
 
@@ -216,7 +216,13 @@
     const waline = Fn({
       el: el.querySelector('#waline-wrap'),
       serverURL: 'https://wiki.stxwer.top/comment',
-      serverURL: 'https://wiki.stxwer.top/comment',
+      search: 'false',
+      emoji: [
+          'https://unpkg.com/@waline/emojis@1.2.0/soul-emoji',
+          'https://unpkg.com/@waline/emojis@1.2.0/bilibili',
+          'https://unpkg.com/@waline/emojis@1.2.0/qq',
+          'https://unpkg.com/@waline/emojis@1.2.0/bmoji',
+      ]
       pageview: false,
       dark: 'html[data-theme="dark"]',
       comment: true,
