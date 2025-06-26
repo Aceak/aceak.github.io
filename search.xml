@@ -498,7 +498,7 @@ WindowsWindows 版本提供安装程序 Sunshine Installer 和 便携版 Sunshin
 [2025-06-11 15:52:34.628]: Info:[2025-06-11 15:52:34.628]: Info: // Ignore any errors mentioned above, they are not relevant. //[2025-06-11 15:52:34.628]: Info:[2025-06-11 15:52:34.628]: Info: Found H.264 encoder: libx264 [software][2025-06-11 15:52:34.631]: Info: Configuration UI available at [https://localhost:47990]
 Sunshine 启动之后，可以访问 https://localhost:47990 来进入 Web 管理页面，首次登陆会要求输入管理账号和密码后续会通过 Basic 方式登录认证登陆成功后会看到下图所示的管理页面。接下来我们点击 Configuration -&gt; General -&gt; Locale 里选择简体中文，将语言改成中文，点击 Save -&gt; Apply 保存并应用，之后刷新网页，就能发现我们页面变成中文了。点击 Apply（应用）后刷新网页，可能会无法访问，此时在终端重启 Sunshine 主程序即可。
 Sunshine 启用 IPv6在 配置 -&gt; NetWork -&gt; IP 地址族 选择 IPv4 + IPv6 ，保存 -&gt; 应用至此，Sunshine 配置结束了。
-开放 Sunshine 服务端口Sunshine 默认使用的端口
+开放 Sunshine 服务端口Sunshine 默认端口
 
 
 服务
