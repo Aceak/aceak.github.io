@@ -566,7 +566,8 @@ Domains 处填写解析 IPv6 地址的域名。配置完之后点击保存，至
 
 Moonlight 配置Moonlight 是一款开源的远程游戏串流客户端，基于 NVIDIA 的 GameStream 技术开发，支持在局域网或互联网中将主机上的游戏画面低延迟地传输到其他设备（如手机、平板、电视、笔记本）上。它支持 4K、60FPS、高码率传输，搭配 Sunshine 使用可不依赖 NVIDIA 显卡，实现高质量的跨平台远程游戏体验。
 下载地址Windows&#x2F;Linux&#x2F;Mac：MoonLight-QtIOS&#x2F;AppleTV：AppStoreAndroid：GoogleStore，Github
-连接 Sunshine这里以 Windows 版本的Moonlight 为例，其他版本的 Moonlight 也基本相同。点击右上角 + 号，输入之前配置的域名，如果连接成功，Sunshine 服务器就会出现在计算机列表：由于此时还未完成配对，会出现锁的图标，点击锁，会提示跟服务器匹配：此时在Sunshine 服务器上访问 https://localhost:47990 进入 Sunshine 后台，点击 Pin码，输入 Moonlight 上显示的 Pin码，设备名称可以按照自己的喜好来填写，点击发送，完成配对。此时打开 Moonlight，发现锁的图标消失了，说明配对成功，点击对应的 Sunshine 服务器就可以开始串流。至此，Moonlight 已连接 Sunshine，完成整个串流配置。
+连接 Sunshine这里以 Windows 版本的Moonlight 为例，其他版本的 Moonlight 也基本相同。点击右上角 + 号，输入之前配置的域名，如果连接成功，Sunshine 服务器就会出现在计算机列表：由于此时还未完成配对，会出现锁的图标，点击锁，会提示跟服务器匹配：此时在Sunshine 服务器上访问 https://localhost:47990 进入 Sunshine 后台，点击 Pin码，输入 Moonlight 上显示的 Pin码，设备名称可以按照自己的喜好来填写，点击发送，完成配对。此时打开 Moonlight，发现锁的图标消失了，说明配对成功，点击对应的 Sunshine 服务器就可以开始串流。    
+至此，Moonlight 已连接 Sunshine，完成整个串流配置。
 ]]></content>
       <categories>
         <category>工具</category>
