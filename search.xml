@@ -532,18 +532,7 @@ UDP
 Moonlight 发现 Sunshine
 
 
-
-
-
-
-
-
 一般情况下，Windows 是默认放行 Sunshine 相关端口的，而 Linux 则需要在 Firewalld 开放 Sunshine 使用到的端口，使其能被局域网中的其他设备连接，具体命令如下：
-
-
-
-
-
 # 放行 TCP 端口sudo firewall-cmd --permanent --add-port=47984/tcp --add-port=47989/tcp --add-port=47990/tcp --add-port=48010/tcp# 放行 UDP 端口sudo firewall-cmd --permanent --add-port=47998-48000/udp# 应用策略sudo firewall-cmd --reload
 现在，应该可以从同局域网中的其他设备的 Moonlight 上看到这台 Sunshine 主机了。
 ]]></content>
